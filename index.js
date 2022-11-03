@@ -3,29 +3,32 @@ const app = express();
 const cors = require("cors");
 const { resolve } = require("path");
 const env = require("dotenv").config({ path: "./.env" });
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2022-08-01",
-});
-
-app.use(express.static(process.env.STATIC_DIR));
+const stripe = require("stripe")(
+  "sk_test_51LyoyLGYlSiTW2Mhyb1m6UbBENu78RypyTkjFOwNtYuMx87Xp7Pr8VamUnFFbL1c69GEb16xwATqIUSIwoNFBjxm00GaWNcswk",
+  {
+    apiVersion: "2022-08-01",
+  }
+);
+app.use(express.json());
+app.use(express.static("../client"));
 app.use(cors());
 app.get("/", (req, res) => {
-  const path = resolve(process.env.STATIC_DIR + "/index.html");
+  const path = resolve("../client" + "/index.html");
   res.sendFile(path);
 });
 
 app.get("/config", (req, res) => {
   res.send({
-    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+    publishableKey:
+      "pk_test_51LyoyLGYlSiTW2Mh9fUnZAZGKxj08b7ou2Y9N2I7tmiOtfqn2MaiZjoebe0EuTtMK8QNm3xoTHYjtbl2dZI0wbpo00A8KUDGo2",
   });
 });
 
 app.post("/create-payment-intent", async (req, res) => {
-  console.log(req);
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       currency: "USD",
-      amount: 99999,
+      amount: req.body.amount,
       automatic_payment_methods: { enabled: true },
     });
     res.send({
